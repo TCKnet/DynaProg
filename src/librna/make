@@ -1,0 +1,52 @@
+#!/bin/sh
+# From ViennaRNA-2.0.7 (stripped down): vienna/ and rnafold/ folders
+# From ADPC 0.9 / GAPC/librna (modified): rnalib.[ch]
+
+JAVA_INC="-I$JAVA_HOME/include -I$JAVA_HOME/include/linux"
+if [ "$OSTYPE" = "darwin" ]; then
+  JAVA_INC="$JAVA_INC -I/System/Library/Frameworks/JavaVM.framework/Headers"
+  md5_hash() { md5 -q $@; }
+  LDFLAGS=""
+else
+  LDFLAGS="-lm"
+  md5_hash() { md5sum $@; }
+fi
+
+root="`pwd`"; cd "`dirname $0`"; base="`pwd`";
+if [ "$1" = "" ]; then
+	out="bin"; rm -r "$out" 2>/dev/null; mkdir -p "$out";
+else
+	cd "$root"; mkdir -p "$1"; cd "$1"; out="`pwd`"; cd "$base";
+fi
+
+# --------------------------------------------------
+# JNI library
+
+name="libRNA.jnilib"
+md5_hash *.[ch] vienna/*.[ch] > "$out/$name.tmp"
+if diff "$out/$name.md5" "$out/$name.tmp" 1>/dev/null 2>/dev/null && [ -f "$out/$name" ]; then
+	echo "[make] $name up to date."; rm "$out/$name.tmp";
+else
+	printf "[make] Compiling $name ... "
+	gcc -Wall -O3 -fPIC -shared $JAVA_INC librna.c vienna/vienna.c $LDFLAGS -o "$out"/libRNA.jnilib || exit
+	mv "$out/$name.tmp" "$out/$name.md5"
+	echo 'done.'
+fi
+
+# --------------------------------------------------
+# Reference RNAfold (ViennaRNA)
+
+name="RNAfold"
+md5_hash *.[ch] rnafold/*.[ch] vienna/*.[ch] > "$out/$name.tmp"
+if diff "$out/$name.md5" "$out/$name.tmp" 1>/dev/null 2>/dev/null && [ -f rfold ]; then
+	echo "[make] $name up to date."; rm "$out/$name.tmp";
+else
+	printf "[make] Compiling $name ... "
+	gcc -Wall -O3 -Ivienna rnafold/RNAfold.c vienna/vienna.c $LDFLAGS -o rfold || exit
+	mv "$out/$name.tmp" "$out/$name.md5"
+	echo 'done.'
+fi
+
+# --------------------------------------------------
+#echo ccgaugccagcgucugcgccuucgccuaagggggagaagaagcucucccauaacggcaug | ./rfold
+#echo ccgaugccagcgucugcgccuucgccuaagggggagaagaagcucucccauaacggcaug | ../../resources/RNAfold_orig_mac --noPS --noLP -d2

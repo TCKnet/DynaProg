@@ -1,0 +1,72 @@
+--- src/common/BooleanOps.scala
++++ src/common/BooleanOps.scala
+@@ -26,8 +26,16 @@ trait BooleanOpsExp extends BooleanOps with BaseExp {
+   case class BooleanOr(lhs: Exp[Boolean], rhs: Exp[Boolean]) extends Def[Boolean]
+ 
+   def boolean_negate(lhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = BooleanNegate(lhs)
+-  def boolean_and(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = BooleanAnd(lhs,rhs)
+-  def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = BooleanOr(lhs,rhs)
++  def boolean_and(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
++    case Const(true) => rhs
++    case Const(false) => lhs
++    case _ => BooleanAnd(lhs,rhs)
++  }
++  def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
++    case Const(true) => lhs
++    case Const(false) => rhs
++    case _ => BooleanOr(lhs,rhs)
++  }
+ 
+   override def mirror[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
+     case BooleanNegate(x) => boolean_negate(f(x))
+@@ -53,12 +61,11 @@ trait CLikeGenBooleanOps extends CLikeGenBase {
+   val IR: BooleanOpsExp
+   import IR._
+ 
+-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = {
+-    rhs match {
+-      case BooleanNegate(b) =>
+-        emitValDef(sym, "!" + quote(b))
+-      case _ => super.emitNode(sym,rhs)
+-    }
++  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
++    case BooleanNegate(b) => emitValDef(sym, "!" + quote(b))
++    case BooleanAnd(lhs,rhs) => emitValDef(sym, quote(lhs) + " && " + quote(rhs))
++    case BooleanOr(lhs,rhs) => emitValDef(sym, quote(lhs) + " || " + quote(rhs))
++    case _ => super.emitNode(sym,rhs)
+   }
+ }
+ 
+--- src/common/IfThenElse.scala
++++ src/common/IfThenElse.scala
+@@ -36,11 +36,13 @@ trait IfThenElseExp extends IfThenElse with EffectExp {
+   
+   case class IfThenElse[T:Manifest](cond: Exp[Boolean], thenp: Block[T], elsep: Block[T]) extends AbstractIfThenElse[T]
+ 
+-  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) = {
+-    val a = reifyEffectsHere(thenp)
+-    val b = reifyEffectsHere(elsep)
+-
+-    ifThenElse(cond,a,b)
++  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) = cond match {
++    case Const(true) => thenp
++    case Const(false) => elsep
++    case _ =>
++      val a = reifyEffectsHere(thenp)
++      val b = reifyEffectsHere(elsep)
++      ifThenElse(cond,a,b)
+   }
+ 
+   def ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: Block[T], elsep: Block[T])(implicit pos: SourceContext) = {
+
+--- src/internal/CCodegen.scala
++++ src/internal/CCodegen.scala
+@@ -245,6 +245,8 @@ trait CCodegen extends CLikeCodegen {
+     }
+     else {
+       m.toString match {
++        case "Char" => "char"
++        case "Short" => "short"
+         case "Int" => "int"
+         case "Long" => "long"
+         case "Float" => "float"
