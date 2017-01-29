@@ -374,10 +374,12 @@ trait CodeGen extends BaseParsers { this:Signature => reqJNI
       (if (twotracks) "  input_t *in2=NULL; jni_read(env,input2,&in2);\n  my_init(in1,in2); free(in2);"
                  else "  my_init(in1,NULL);"),"- JNI read")+"  free(in1);\n"+
     ctime("  my_solve();\n","- Compute")
+    val ext_op = "#ifdef __cplusplus\nextern \"C\" {\n#endif\n"
+    val ext_cl = "#ifdef __cplusplus\n}\n#endif\n"
 
-    "#include <jni.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <sys/time.h>\n#include \"{file}.h\"\n#ifdef __cplusplus\n"+
-    "extern \"C\" {\n#endif\n"+call+"parse"+parm+";\n"+call+"backtrack"+parm+";\n#ifdef __cplusplus\n}\n#endif\n\n"+
-    head.jniRead(tpAlphabet)+"\n"+head.jniWrite(tpAnswer,catMax>0)+"\n"+
+    "#include <jni.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <sys/time.h>\n#include \"{file}.h\"\n" +
+    ext_op+call+"parse"+parm+";\n"+call+"backtrack"+parm+";\n"+ext_cl+"\n"+
+    head.jniRead(tpAlphabet)+"\n"+head.jniWrite(tpAnswer,catMax>0)+"\n"+ext_op+
     "jobject Java_{className}_parse"+parm+" {\n"+solve+
     "  "+tpAnswer+" score=my_backtrack(NULL,NULL);\n"+
     "  jobject result = jni_write(env, score, NULL, 0);\n"+flush+
@@ -386,7 +388,7 @@ trait CodeGen extends BaseParsers { this:Signature => reqJNI
     "  trace_t *trace=NULL; unsigned size=0;\n"+
     ctime("  "+tpAnswer+" score=my_backtrack(&trace,&size);\n","- Backtrack")+
     ctime("  jobject result = jni_write(env, score, trace, size); free(trace);\n","- JNI output")+flush+
-    "  my_free(); return result;\n}\n"
+    "  my_free(); return result;\n}\n"+ext_cl
   }
 
   // --------------------------------------------------------------------------
@@ -548,8 +550,8 @@ trait CodeGen extends BaseParsers { this:Signature => reqJNI
       if (benchmark) println("%-20s : %d x %d / %d".format("Size / splits",size1,size2,splits))
 
       val map = scala.collection.immutable.Map(("className",className),("MAT_HEIGHT",""+(size1+1)),("MAT_WIDTH",""+(size2+1)),("SPLITS",""+splits))
-      if (gpu) time("C+CUDA compilation"){()=> add("h", code_h, map); add("c", code_c, map); add("cu", code_cu, map); gen }
-      else time("C compilation"){()=> add("h", code_h, map); add("c", code_c+code_cc, map); gen }
+      if (gpu) time("C+CUDA compilation"){()=> add("h", code_h, map); add("cc", code_c, map); add("cu", code_cu, map); gen }
+      else time("C compilation"){()=> add("h", code_h, map); add("cc", code_c+code_cc, map); gen }
       time("Scala compilation"){()=>
         val cl = (if(tt) classOf[TTWrapper[Alphabet,Answer]] else classOf[ADPWrapper[Alphabet,Answer]]).getCanonicalName
         val al = tpAlphabet match {case head.TPri(s,_,_)=>s case _=>"Any"}

@@ -159,7 +159,7 @@ trait LMSGen extends CodeGen with ScalaOpsPkgExp with DPExp { self:Signature =>
     gen[Answer](t.inner,(v:Rep[Answer],r:Rep[Int]) => _write(t,i0,j0,v,r,bt0),i0,j0,0,true)
 
     def gen[T](p0:Parser[T],cont:Cont[T],i:Rep[Int],j:Rep[Int],off:Int,top:Boolean=false) : Rep[Unit] = p0 match {
-      case Aggregate(p,h) => 
+      case Aggregate(p,h) =>
         implicit val mT:Manifest[T]=tps._2.asInstanceOf[Manifest[T]] // FIXME: not necessarily, but do we care ?
         implicit val oT=new Ordering[T] { def compare(x:T,y:T): Int=0 } // FIXME: I love cheating
         def af[U](f:T=>U):Rep[T]=>Rep[T] = f match { case l@LFun(f0) => f0.asInstanceOf[Rep[T]=>Rep[T]] case _ => sys.error("Non-LMS function: "+f) }  // FIXME: T=>Numeric[U]

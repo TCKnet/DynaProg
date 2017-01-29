@@ -48,7 +48,7 @@ trait MatrixPrettyPrint extends MatrixSig {
 
 // Combining two algebrae manually (inefficient, requires O(n^3) storage)
 trait MatrixPrettyAlgebra extends MatrixSig {
-  object m extends MatrixGrammar with MatrixAlgebra 
+  object m extends MatrixGrammar with MatrixAlgebra
   object p extends MatrixGrammar with MatrixPrettyPrint
   type Answer = (m.Answer,p.Answer)
   val single = (i: Alphabet) => (m.single(i), p.single(i))
@@ -68,6 +68,7 @@ trait MatrixAlgebraC extends MatrixSig {
                     "l,r", "return (T3iii){l._1, l._2+r._2 + l._1*l._3*r._3, r._3};")
 }
 
+/*
 // Cost algebra for LMS code generation
 trait MatrixAlgebraLMS extends MatrixSig with LMSGenADP {
   type Answer = (Int,Int,Int) // rows, cost, columns
@@ -76,13 +77,14 @@ trait MatrixAlgebraLMS extends MatrixSig with LMSGenADP {
   val single = lfun((m:Rep[Alphabet])=>(m._1,unit(0),m._2) )
   val mult = lfun2((p:Rep[(Answer,Answer)])=>{ val l=p._1; val r=p._2; (l._1, l._2+r._2 + l._1*l._3*r._3, r._3) })
 }
+*/
 
 // -----------------------------------------------
 
 // Our application
 object MatrixMult extends App {
   object mmc extends MatrixGrammar with MatrixAlgebraC with CodeGen // CodeGen enabled
-  object mml extends MatrixGrammar with MatrixAlgebraLMS // LMS enabled
+  // object mml extends MatrixGrammar with MatrixAlgebraLMS // LMS enabled
 
   // Demonstration of grammar and algebrae usage
   def demo = {
@@ -116,6 +118,7 @@ object MatrixMult extends App {
     println("    "+pr.build(mats,bt)+" = "+pr.build(mats,bt2)+" = "+pr.build(mats,bt3))
     println("-> Or different results with the same cost")
     for((r,i)<-mmco.backtrack(mats).zipWithIndex) println("   "+(i+1)+": "+r._1+" <-- "+r._2)
+    /*
     println
     println("You think that's all ? No, we can use LMS to generate more efficient ...")
     println("Scala (converting into generators)")
@@ -124,6 +127,7 @@ object MatrixMult extends App {
     println("  "+mml.parse(mats,mml.psCPU))
     println("GPU code (CUDA)")
     println("  "+mml.parse(mats,mml.psCUDA))
+    */
   }
 
   // Correctness verification (simple tests due to the problem nature)
@@ -135,9 +139,11 @@ object MatrixMult extends App {
     test("ScalaBottomUp",mmc.backtrack(mats,mmc.psBottomUp).head._2)
     test("CPU",mmc.backtrack(mats,mmc.psCPU).head._2)
     test("CUDA",mmc.backtrack(mats,mmc.psCUDA).head._2)
+    /*
     test("LMS-Scala",mml.backtrack(mats,mml.psScalaLMS).head._2)
     test("LMS-CPU",mml.backtrack(mats,mml.psCPU).head._2)
     test("LMS-CUDA",mml.backtrack(mats,mml.psCUDA).head._2)
+    */
   }
 
   def bench(size:Int,num:Int=1) {
@@ -151,12 +157,14 @@ object MatrixMult extends App {
     run("CPU+BT",mats=>mmc.backtrack(mats,mmc.psCPU))
     run("CUDA",mats=>mmc.parse(mats,mmc.psCUDA))
     run("CUDA+BT",mats=>mmc.backtrack(mats,mmc.psCUDA))
+    /*
     run("LMS-Scala",mats=>mml.parse(mats,mml.psScalaLMS))
     run("LMS-Scala+BT",mats=>mml.backtrack(mats,mml.psScalaLMS))
     run("LMS-CPU",mats=>mml.parse(mats,mml.psCPU))
     run("LMS-CPU+BT",mats=>mml.backtrack(mats,mml.psCPU))
     run("LMS-CUDA",mats=>mml.parse(mats,mml.psCUDA))
     run("LMS-CUDA+BT",mats=>mml.backtrack(mats,mml.psCUDA))
+    */
   }
   //demo
   //check

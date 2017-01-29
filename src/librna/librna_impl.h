@@ -60,32 +60,32 @@ my_dev static paramT *my_P = NULL;
 // my_dev static char* my_seq = NULL;
 // my_dev static int my_len = 0;
 
-my_dev int termau_energy(rsize i, rsize j);
-my_dev int hl_energy(rsize i, rsize j);
-my_dev int hl_energy_stem(rsize i, rsize j);
-my_dev int il_energy(rsize i, rsize j, rsize k, rsize l);
-my_dev int bl_energy(rsize bl, rsize i, rsize j, rsize br, rsize Xright);
-my_dev int br_energy(rsize bl, rsize i, rsize j, rsize br, rsize Xleft);
-my_dev int sr_energy(rsize i, rsize j);
-my_dev int sr_pk_energy(char a, char b, char c, char d);
-my_dev int dl_energy(rsize i, rsize j);
-my_dev int dr_energy(rsize i, rsize j);
-my_dev int dli_energy(rsize i, rsize j);
-my_dev int dri_energy(rsize i, rsize j);
-my_dev int ext_mismatch_energy(rsize i, rsize j);
-my_dev int ml_mismatch_energy(rsize i, rsize j);
-my_dev int ml_energy();
-my_dev int ul_energy();
-my_dev int sbase_energy();
-my_dev int ss_energy(rsize i, rsize j);
+my_dev static int termau_energy(rsize i, rsize j);
+my_dev static int hl_energy(rsize i, rsize j);
+my_dev static int hl_energy_stem(rsize i, rsize j);
+my_dev static int il_energy(rsize i, rsize j, rsize k, rsize l);
+my_dev static int bl_energy(rsize bl, rsize i, rsize j, rsize br, rsize Xright);
+my_dev static int br_energy(rsize bl, rsize i, rsize j, rsize br, rsize Xleft);
+my_dev static int sr_energy(rsize i, rsize j);
+my_dev static int sr_pk_energy(char a, char b, char c, char d);
+my_dev static int dl_energy(rsize i, rsize j);
+my_dev static int dr_energy(rsize i, rsize j);
+my_dev static int dli_energy(rsize i, rsize j);
+my_dev static int dri_energy(rsize i, rsize j);
+my_dev static int ext_mismatch_energy(rsize i, rsize j);
+my_dev static int ml_mismatch_energy(rsize i, rsize j);
+my_dev static int ml_energy();
+my_dev static int ul_energy();
+my_dev static int sbase_energy();
+my_dev static int ss_energy(rsize i, rsize j);
 
-my_dev int dl_dangle_dg(enum base_t dangle, enum base_t i, enum base_t j);
-my_dev int dr_dangle_dg(enum base_t i, enum base_t j, enum base_t dangle);
+my_dev static int dl_dangle_dg(enum base_t dangle, enum base_t i, enum base_t j);
+my_dev static int dr_dangle_dg(enum base_t i, enum base_t j, enum base_t dangle);
 
-my_dev double mk_pf(double x);
-my_dev double scale(int x);
+my_dev static double mk_pf(double x);
+my_dev static double scale(int x);
 
-my_dev bool iupac_match(enum base_t base, unsigned char iupac_base);
+my_dev static bool iupac_match(enum base_t base, unsigned char iupac_base);
 
 #define INLINE inline
 #define GAPS_DISABLED // input sequence does not contain any gap

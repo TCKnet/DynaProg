@@ -53,7 +53,7 @@ object SeqTest extends Signature with TTParsers with App {
   | eli -~ (eli -~ axiom ~- eli) ~- eli ^^ { case (e1,((e2,(x,e3)),e4)) => ((in1(e2)+in2(e3)) + (in1(e1)+in2(e4))*100 + x._1, x._2+"("+(0+e1)+"-"+(0+e4)+","+(0+e2)+"-"+(0+e3)+")"  ) }
   ) aggregate h)
 
-  val in1="10101010".map{case '1'=>'\1'case _=>'\0'}.toArray
-  val in2="10101010".map{case '1'=>'\1'case _=>'\0'}.toArray
+  val in1="10101010".map{case '1'=>'\u0001' case _=>'\u0000'}.toArray
+  val in2="10101010".map{case '1'=>'\u0001' case _=>'\u0000'}.toArray
   Utils.printBT(backtrack(in1,in2))
 }

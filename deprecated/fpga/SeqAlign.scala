@@ -16,7 +16,7 @@ trait SWat extends SeqSig {
   val start = cfun1((x:Unit) => 0, "","0[]")
   val gap1 = cfun2((g:Char,a:Int) => Math.max(0, a-3), "g,a","max(0,a-8[])")
   val gap2 = cfun2((a:Int,g:Char) => Math.max(0, a-3), "a,g","max(0,a-8[])")
-  val pair = cfun3((c1:Char,a:Int,c2:Char) => if (c1==c2) a+10 else Math.max(0,a-3), "c1,a,c2", "if (c1==c2) a+15[] else a-12[]") 
+  val pair = cfun3((c1:Char,a:Int,c2:Char) => if (c1==c2) a+10 else Math.max(0,a-3), "c1,a,c2", "if (c1==c2) a+15[] else a-12[]")
 
 //  val start = cfun1((x:Unit) => 0, "","return 0;")
 //  val open1 = cfun2((c1:Alphabet,a:Answer) => Math.max(0, a+open), "c1,a", "return a>3 ? a-3 : 0;")

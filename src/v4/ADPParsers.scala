@@ -71,7 +71,7 @@ trait LexicalParsers extends ADPParsers { this:Signature =>
 
   import scala.language.implicitConversions
   implicit def toCharArray(s:String):Array[Char] = s.toArray
-  private def esc(s:String) = (s /: List(('\\','\\'),('"','"'),('\'','\''),('\n','n'),('\r','r'),('\t','t'),('\0','0'),('\b','b'),('\f','f'))) {case (s,(a,b))=>s.replace(""+a,"\\"+b)}
+  private def esc(s:String) = (s /: List(('\\','\\'),('"','"'),('\'','\''),('\n','n'),('\r','r'),('\t','t'),('\u0000','0'),('\b','b'),('\f','f'))) {case (s,(a,b))=>s.replace(""+a,"\\"+b)}
   private def cf(f:Char=>Boolean,cc:String) = cfun1((i:Int,j:Int) => (i+1==j) && f(in(i)),"i,j","if (i+1!=j) return false; c=_in1[i]; "+cc)
   def in(k:Int):Char
 }
@@ -80,7 +80,7 @@ trait RNASignature extends Signature { reqJNI
   final type Alphabet = Char
   val energies = true
   var paramsFile:String = null // parameters for CodeGen
-  
+
   // Setting LibRNA parameters
   def setParams(file:String) = this match {
     case c:CodeGen => paramsFile = file
@@ -88,16 +88,16 @@ trait RNASignature extends Signature { reqJNI
   }
 
   // Conversion to internal representation
-  def convert(in:String):Array[Alphabet] = in.toArray.map { case 'A'|'a'=>'\1' case 'C'|'c'=>'\2' case 'G'|'g'=>'\3' case 'T'|'t'|'U'|'u'=>'\4' case _ => '\5' }
+  def convert(in:String):Array[Alphabet] = in.toArray.map { case 'A'|'a'=>'\u0001' case 'C'|'c'=>'\u0002' case 'G'|'g'=>'\u0003' case 'T'|'t'|'U'|'u'=>'\u0004' case _ => '\u0005' }
 
   // Predefined filters
   def length(min:Int=0,max:Int= -1) = cfun2((i:Int,j:Int) => (j-i)>=min && (max < 0 || j-i<=max), "i,j","return j-i>="+min+(if(max>=0)" && j-i<="+max else "")+";")
   val stackpairing = cfun2((i:Int,j:Int) => basepairing(i,j) && basepairing(i+1,j-1), "i,j","return i+4<=j && bp_index(_in1[i],_in1[j-1])!=NO_BP && bp_index(_in1[i+1],_in1[j-2])!=NO_BP;")
   val basepairing = cfun2((i:Int,j:Int) => if (i+2>j) false else (in(i),in(j-1)) match {
-    case ('\1','\4') | ('\4','\1') | ('\4','\3') | ('\3','\4') | ('\3','\2') | ('\2','\3') => true // a-u, u-a, u-g, g-u, g-c, c-g
+    case ('\u0001','\u0004') | ('\u0004','\u0001') | ('\u0004','\u0003') | ('\u0003','\u0004') | ('\u0003','\u0002') | ('\u0002','\u0003') => true // a-u, u-a, u-g, g-u, g-c, c-g
     case _ => false
   },"i,j","return i+2<=j && bp_index(_in1[i],_in1[j-1])!=NO_BP;")
 
   // Expose ADPParsers input
-  def in(x:Int):Char 
+  def in(x:Int):Char
 }

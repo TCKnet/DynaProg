@@ -57,7 +57,7 @@ class CodeHeader(within:Any) {
           case "java.lang.Integer" => pri("Int")
           case n if n.startsWith("java.lang.") => val c=n.substring(10); pri.get(c) match { case Some(p)=>p case None=>sys.error(n+" unsupported") }
           case n if n.startsWith("scala.Tuple") => sys.error("Tuples unsupported")
-          case n => try { val cls:Class[_<:Any] = try { Class.forName(ctx+n0) } catch { case _ => Class.forName(n) }
+          case n => try { val cls:Class[_<:Any] = try { Class.forName(ctx+n0) } catch { case _:Throwable => Class.forName(n) }
             TClass(cls.getName,cls.getDeclaredFields.map{f=>if (f.getName=="$outer") sys.error("Nested class "+n+" not supported"); (apply(f.getType.toString),f.getName)}.toList)
           } catch { case e:Exception => throw new Exception(e.getMessage+" in "+n) }}}
       | failure("Illegal type expression"))
@@ -67,7 +67,7 @@ class CodeHeader(within:Any) {
   // Types declarations
   import scala.collection.mutable.HashMap
   private var tpc=0;
-  
+
   val tps=new HashMap[String,String](); // struct body -> name
   def addType(tp:String,name:String):String = tps.getOrElseUpdate(tp,name)
   def getType(str:String):String = parse(str).toString

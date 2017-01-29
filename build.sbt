@@ -1,28 +1,26 @@
 name := "DynaProg"
 
-scalaOrganization := "org.scala-lang.virtualized"
-
-scalaVersion := "2.10.0"
+scalaVersion := "2.12.1"
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.virtualized" % "scala-library" % "2.10.0",
-  "org.scala-lang.virtualized" % "scala-compiler" % "2.10.0",
-  "EPFL" % "lms_2.10.0" % "0.3-SNAPSHOT"
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5",
+  "org.scala-lang" % "scala-compiler" % "2.12.1"
 )
 
-scalacOptions ++= List("-Yvirtualize", "-target:jvm-1.7", "-optimise", "-deprecation", "-feature", "-unchecked")
+scalacOptions ++= List("-target:jvm-1.8", "-opt:l:classpath", "-deprecation", "-feature", "-unchecked")
 
-scalaSource in Compile <<= baseDirectory(_ / "src")
+scalaSource in Compile := baseDirectory(_ / "src").value
 
-compile in Compile <<= (compile in Compile) map { x => ("src/librna/make target/scala-2.10/classes").run.exitValue; x }
+compile in Compile ~= { x => ("src/librna/make target/scala-2.12/classes").run.exitValue; x }
 
-{
-  def t(n:String) = { val t=TaskKey[Unit](n); t.dependsOn(compile in Compile); t }
-  def s(t:TaskKey[Unit],cl:String) = Seq(fullRunTask(t in Test, Test, cl), fork in t:=true,javaOptions in t++=List("-Xss64m"))
-  val (mm,mm2,mm3,align,zuker,z2,rnafold,nu,swat)=(t("mm"),t("mm2"),t("mm3"),t("align"),t("zuker"),t("z2"),t("rnafold"),t("nu"),t("swat")) // Examples
-  val lt1=t("lt1") // LMS testing
-  val ex="v4.examples."
-  s(mm,ex+"MatrixMult") ++ s(mm2,ex+"MatrixMult2") ++ s(mm3,ex+"MatrixMult3") ++ s(align,ex+"SeqAlign") ++
-  s(zuker,ex+"Zuker") ++ s(z2,ex+"Zuker2") ++ s(rnafold,ex+"RNAFold") ++ s(nu,ex+"Nussinov") ++ s(swat,ex+"SWatAffine") ++
-  s(lt1,ex+"TestLMS")
+def tt(n:String, cls:String) = TaskKey[Unit](n) := {
+  (compile in Compile).value
+  val base = baseDirectory.value
+  val cp = (managedClasspath in Compile map { cp => Path.makeString(cp.files)}).value
+  ("java -Xss64m -cp "+base+"/target/scala-2.12/classes:"+base+"/bin:"+cp+" v4.examples."+cls) !
 }
+tt("mm", "MatrixMult"); tt("mm2", "MatrixMult2"); tt("mm3", "MatrixMult3")
+tt("zuker", "Zuker"); tt("z2", "Zuker2"); tt("rnafold", "RNAFold")
+tt("sa", "SeqAlign"); tt("nu", "Nussinov"); tt("swat", "SWatAffine")
+
+

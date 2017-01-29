@@ -49,7 +49,7 @@ trait ScalaCompiler {
     run.compileSources(List(new scala.reflect.internal.util.BatchSourceFile("<stdin>", source)))
     reporter.printSummary(); reporter.reset
     val parent = this.getClass.getClassLoader
-    val loader = new scala.tools.nsc.interpreter.AbstractFileClassLoader(fileSystem, parent)
+    val loader = new scala.reflect.internal.util.AbstractFileClassLoader(fileSystem, parent)
     val cls: Class[_] = loader.loadClass(className)
     cls.newInstance.asInstanceOf[T]
   }
@@ -83,7 +83,7 @@ trait CCompiler {
     builder.toString
   }
 
-  // create/append to a file (c,cpp,cu,h)
+  // create/append to a file (cc,cu,h)
   def add(ext:String, content:String):Unit = add(ext,content,Map())
   def add(ext:String, content:String, map:Map[String,String]) {
     val cnt = replace(content,map)
@@ -117,8 +117,7 @@ trait CCompiler {
     new File(outPath).mkdirs
     dataMap.foreach { case (ext,data) => val out=new FileWriter(outPath+"/"+f+"."+ext); out.write(replace(data,Map(("file",f)))); out.close }
     dataMap.foreach {
-      case("c",_) =>   run("g++ "+ccFlags+" "+f+".c -c -o "+f+"_c.o") // gcc fails to link properly with nvcc object files
-      case("cpp",_) => run("g++ "+ccFlags+" "+f+".cpp -c -o "+f+"_cpp.o")
+      case("cc",_) => run("g++ "+ccFlags+" "+f+".cc -c -o "+f+"_cc.o")
       case("cu",_) =>  run(cudaPath+"/bin/nvcc "+cudaFlags+" "+ccFlags+" "+f+".cu -c -o "+f+"_cu.o")
       case _ =>
     }

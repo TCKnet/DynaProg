@@ -74,7 +74,7 @@ trait FPGACodeGen extends CodeGen with TTParsers { this:Signature=>
   }
 
   def genParser[T](p0:Parser[T],i:Var,j:Var):List[String] = p0 match {
-    case Aggregate(p,h) => 
+    case Aggregate(p,h) =>
       val f = h.toString match { case "$$max$$"=>"max" case "$$min$$"=>"min" case _=>sys.error("Unsupported aggregation: "+h) }
       val l = genParser(p,i,j); List((l.head /: l.tail){(a,b)=>f+"("+a+","+b+")"  })
     case Or(l,r) => genParser(l,i,j):::genParser(r,i,j)
