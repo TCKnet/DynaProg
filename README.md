@@ -9,6 +9,7 @@ The full project repository can be found [here](https://github.com/manojo/lamp-d
 
 1. Install [SBT](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html) and add it to your PATH
 
+<!--
 2. Patch (with provided patch) and publish locally [LMS](https://github.com/tiarkrompf/virtualization-lms-core)
 
         git clone https://github.com/TiarkRompf/virtualization-lms-core.git
@@ -16,14 +17,13 @@ The full project repository can be found [here](https://github.com/manojo/lamp-d
         git checkout develop
         patch -p0 < ..../lms-patch.diff
         sbt publish-local
+-->
 
-<!--
 3. Clone [DynaProg](https://github.com/TCKnet/DynaProg.git) repository
 
         git clone https://github.com/TCKnet/DynaProg.git
         cd DynaProg
         sbt
--->
 
 4. From there you can run the following example programs
     * `mm`, `mm2`, `mm3` : Matrix chain multiplication
