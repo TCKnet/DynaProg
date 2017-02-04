@@ -17,11 +17,13 @@ The full project repository can be found [here](https://github.com/manojo/lamp-d
         patch -p0 < ..../lms-patch.diff
         sbt publish-local
 
+<!--
 3. Clone [DynaProg](https://github.com/TCKnet/DynaProg.git) repository
 
         git clone https://github.com/TCKnet/DynaProg.git
         cd DynaProg
         sbt
+-->
 
 4. From there you can run the following example programs
     * `mm`, `mm2`, `mm3` : Matrix chain multiplication

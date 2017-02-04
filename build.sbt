@@ -11,7 +11,9 @@ scalacOptions ++= List("-target:jvm-1.8", "-opt:l:classpath", "-deprecation", "-
 
 scalaSource in Compile := baseDirectory(_ / "src").value
 
-compile in Compile ~= { x => ("src/librna/make target/scala-2.12/classes").run.exitValue; x }
+compile in Compile ~= { x => new File("bin").mkdirs(); ("src/librna/make target/scala-2.12/classes").run.exitValue; x }
+
+cleanFiles += baseDirectory(_ / "bin").value
 
 def tt(n:String, cls:String) = TaskKey[Unit](n) := {
   (compile in Compile).value
@@ -22,5 +24,3 @@ def tt(n:String, cls:String) = TaskKey[Unit](n) := {
 tt("mm", "MatrixMult"); tt("mm2", "MatrixMult2"); tt("mm3", "MatrixMult3")
 tt("zuker", "Zuker"); tt("z2", "Zuker2"); tt("rnafold", "RNAFold")
 tt("sa", "SeqAlign"); tt("nu", "Nussinov"); tt("swat", "SWatAffine")
-
-
